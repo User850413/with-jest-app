@@ -1,31 +1,34 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [pull_request]
+on: [pull_request, push]
 permissions:
   contents: read
   actions: write
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20]
-
+        node: [18, 20]
     steps:
-      - name: "1. checkout"
+      - name: "1. Checkout"
         uses: actions/checkout@v4
-      - name: "2. setup Node.js"
+      - name: "2. Setup node"
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: "3. install"
+          node-version: ${{ matrix.node }}
+      - name: "3. Install"
         run: npm ci
-      - name: "4. build"
+      - name: "4. Build"
         run: npm run build
-      - name: "5. test"
+      - name: "5. Test"
         run: npm run test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
